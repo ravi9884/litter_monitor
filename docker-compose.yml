@@ -1,0 +1,46 @@
+################################################################################
+# Node-RED Stack or Compose
+################################################################################
+# docker stack deploy node-red --compose-file docker-compose-node-red.yml
+# docker-compose -f docker-compose-node-red.yml -p myNoderedProject up
+################################################################################
+version: "3.7"
+
+services:
+  litter-monitor:
+    container_name: litter-monitor
+    build: .
+    image: 127.0.0.1:5000/litter-monitor
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname!=bhoomi" 
+    secrets:
+      - PLEX_USER
+      - PLEX_PASSWD
+    ports:
+      - "5555:8888"
+    environment:
+      - STORAGE_DIR=/storage
+      - TZ=America/New_York
+      - CAMERA_JPG_URL=http://camerapi/camtest.jpg
+      - ROKU_IP=192.168.1.115
+      - PLEX_CLIENT_NAME=55" TCL Roku TV
+      - PLEX_SERVER_NAME=swarm-plexserver
+      - PLEX_LIBRARY_NAME=trash
+      - MQTT_BROKER=192.168.1.136
+      - INTERVAL=60
+      - START_TIME=0830
+      - END_TIME=2230
+      - CONTEXT_URL=http://bhoomi.augusta.lan:1880/getContext
+      - LOG_LEVEL=DEBUG
+    restart: unless-stopped
+    volumes:
+      - /mnt/storage/litter-monitor:/storage
+
+
+secrets:                        # top level secrets block
+  PLEX_USER:
+    external: true
+  PLEX_PASSWD:
+    external: true
